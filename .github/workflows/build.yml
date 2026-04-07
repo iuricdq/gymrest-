@@ -3,10 +3,6 @@ name: Build GymRest APK
 on:
   push:
     branches: [ main, master ]
-  workflow_dispatch:
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build:
@@ -24,16 +20,10 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Permissão gradlew
+      - name: Permissão Gradlew
         run: chmod +x GymRest/gradlew
 
       - name: Build APK
         run: |
           cd GymRest
-          ./gradlew assembleDebug --stacktrace --info
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: GymRest-debug-apk
-          path: GymRest/app/build/outputs/apk/debug/app-debug.apk
+          ./gradlew assembleDebug --stacktrace
