@@ -15,25 +15,28 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: gradle
 
-      - uses: android-actions/setup-android@v3
+      - name: Setup Android SDK
+        run: |
+          wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O cmdtools.zip
+          mkdir -p $HOME/android-sdk/cmdline-tools
+          unzip -q cmdtools.zip -d $HOME/android-sdk/cmdline-tools
+          mv $HOME/android-sdk/cmdline-tools/cmdline-tools $HOME/android-sdk/cmdline-tools/latest
 
-      - name: Accept licenses
-        run: yes | sdkmanager --licenses 2>/dev/null || true
-
-      - name: Install SDK
-        run: sdkmanager "platforms;android-34" "build-tools;34.0.0"
-
-      - uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: '8.4'
+      - name: Install SDK components
+        run: |
+          yes | $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager --licenses 2>/dev/null || true
+          $HOME/android-sdk/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0"
 
       - name: Build APK
-        run: gradle assembleDebug --no-daemon
+        env:
+          ANDROID_HOME: /home/runner/android-sdk
+        run: |
+          cd GymRest
+          gradle assembleDebug --no-daemon --stacktrace
 
       - uses: actions/upload-artifact@v4
         with:
           name: GymRest-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: GymRest/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
